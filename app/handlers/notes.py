@@ -3,6 +3,7 @@ from aiogram.filters import CommandStart, Command
 from database.db import add_note, delete_notes, get_notes
 router = Router()
 
+
 '''функция создания заметки'''
 @router.message(Command(commands=["add"]))
 async def add_n(message: types.Message): 
@@ -15,15 +16,19 @@ async def add_n(message: types.Message):
     
     await message.answer("✅ Заметка добавлена!")
     
+    
+    """Функция вывода заметок"""
 @router.message(Command(commands=["list"]))
 async def get_n(message: types.Message):
     notes = get_notes(message.from_user.id)
     if not notes:
         await message.answer("У вас еще нет заметок, вы можете их добавить с помощью /add #Текст заметки")
         return
-    text = "\n".join([f"{note['id']}. {note['text']}" for note in notes])
+    text = "\n".join([f"{note['note_id']}. {note['text']}" for note in notes])
     await message.answer(f"🔍 Найдено:\n{text}")
     
+
+'''Функция удаления заметки'''  
 @router.message(Command(commands=["delete"]))
 async def del_n(message: types.Message):
     args = message.text.replace("/delete", "").strip()
