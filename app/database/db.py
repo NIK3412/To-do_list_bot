@@ -2,6 +2,7 @@ import psycopg
 from psycopg.rows import dict_row
 from config import dbname, user, password, host
 
+
 def connection():
     
     return psycopg.connect(dbname = dbname,
@@ -18,7 +19,8 @@ def init_db():
             id SERIAL PRIMARY KEY,
             user_id BIGINT,
             note_id BIGINT,
-            text TEXT
+            text TEXT,
+            is_done BOOLEAN DEFAULT FALSE
         )
     """))
     conn.commit()
@@ -37,7 +39,7 @@ def add_note(user_id, text): #create note
     
     
     
-    cursor.execute("INSERT INTO notes (user_id, note_id, text) VALUES (%s,%s,%s)",(user_id,new_id,text))
+    cursor.execute("INSERT INTO notes (user_id, note_id, text, is_done ) VALUES (%s,%s,%s, FALSE)",(user_id,new_id,text))
     conn.commit()
     cursor.close()
     conn.close()
@@ -45,11 +47,26 @@ def add_note(user_id, text): #create note
 def get_notes(user_id): #get list of notes
     conn = connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT note_id, text FROM notes WHERE user_id = %s ORDER BY note_id", (user_id,))
+    cursor.execute("SELECT note_id, text, is_done FROM notes WHERE user_id = %s ORDER BY note_id", (user_id,))
     notes = cursor.fetchall()
     cursor.close()
     conn.close()
     return notes
+
+def done_task(user_id, note_id): #crossed task
+    conn = connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+                   UPDATE notes
+                   SET is_done = NOT is_done 
+                   WHERE user_id = %s AND note_id = %s
+                   RETURNING is_done, text
+                   """, (user_id, note_id))
+    result = cursor.fetchone()
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return result
 
 def delete_notes(user_id, note_id):
     conn = connection()

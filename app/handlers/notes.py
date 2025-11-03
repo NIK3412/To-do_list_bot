@@ -1,6 +1,9 @@
 from aiogram import types, Router
 from aiogram.filters import CommandStart, Command
-from database.db import add_note, delete_notes, get_notes
+from database.db import add_note, delete_notes, get_notes, done_task
+
+
+
 router = Router()
 
 
@@ -24,8 +27,15 @@ async def get_n(message: types.Message):
     if not notes:
         await message.answer("У вас еще нет заметок, вы можете их добавить с помощью /add #Текст заметки")
         return
-    text = "\n".join([f"{note['note_id']}. {note['text']}" for note in notes])
-    await message.answer(f"🔍 Найдено:\n{text}")
+    text = ""
+    for note in notes:
+
+        if note['is_done']:
+            text += f"<s>{note['note_id']} {note['text']}</s> ✅\n"
+        else:
+            text += f"{note['note_id']} {note['text']}\n"
+
+    await message.answer(f"📋 Ваши заметки:\n{text}",parse_mode='HTML')
     
 
 '''Функция удаления заметки'''  
@@ -38,3 +48,23 @@ async def del_n(message: types.Message):
     note_id = int(args)
     delete_notes(message.from_user.id, note_id)
     await message.answer(f'Заметка {note_id} была удалена')
+
+@router.message(Command(commands=("cross")))
+async def cross(message: types.Message):
+    args = message.text.replace("/cross", "").strip()
+    if not args.isdigit():
+        await message.answer('введите номер заметки которую хотите удалить')
+        return
+    note_id = int(args)
+    crossed_note = done_task(message.from_user.id, note_id)
+    if not crossed_note:
+        await message.answer("❌ Такой заметки не существует")
+        return
+    is_done, text = crossed_note['is_done'], crossed_note['text']
+
+    if is_done:
+        await message.answer(f"✅ Заметка '{text}' зачёркнута")
+    else:
+        await message.answer(f" Зачёркивание снято с заметки '{text}'")
+
+    
