@@ -1,8 +1,7 @@
 from aiogram import types, Router
 from aiogram.filters import CommandStart, Command
 from database.db import add_note, delete_notes, get_notes, done_task
-
-
+import datetime
 
 router = Router()
 
@@ -29,12 +28,12 @@ async def get_n(message: types.Message):
         return
     text = ""
     for note in notes:
-
+        print(f"\n{note}")
         if note['is_done']:
-            text += f"<s>{note['note_id']} {note['text']}</s> ✅\n"
+            text += f"<s>{note['note_id']} {note['text']}</s>        {note['da_te'].strftime("%Y-%m-%d %H:%M")}✅\n"
         else:
-            text += f"{note['note_id']} {note['text']}\n"
-
+            text += f"{note['note_id']} {note['text']}            {note['da_te'].strftime("%Y-%m-%d %H:%M")}\n"       
+        
     await message.answer(f"📋 Ваши заметки:\n{text}",parse_mode='HTML')
     
 

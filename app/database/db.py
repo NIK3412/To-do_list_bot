@@ -3,6 +3,7 @@ from psycopg.rows import dict_row
 from config import dbname, user, password, host
 
 
+
 def connection():
     
     return psycopg.connect(dbname = dbname,
@@ -20,7 +21,8 @@ def init_db():
             user_id BIGINT,
             note_id BIGINT,
             text TEXT,
-            is_done BOOLEAN DEFAULT FALSE
+            is_done BOOLEAN DEFAULT FALSE,
+            da_te TIMESTAMP
         )
     """))
     conn.commit()
@@ -39,7 +41,7 @@ def add_note(user_id, text): #create note
     
     
     
-    cursor.execute("INSERT INTO notes (user_id, note_id, text, is_done ) VALUES (%s,%s,%s, FALSE)",(user_id,new_id,text))
+    cursor.execute("INSERT INTO notes (user_id, note_id, text, is_done, da_te) VALUES (%s,%s,%s, FALSE, CURRENT_TIMESTAMP)",(user_id,new_id,text))
     conn.commit()
     cursor.close()
     conn.close()
@@ -47,8 +49,9 @@ def add_note(user_id, text): #create note
 def get_notes(user_id): #get list of notes
     conn = connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT note_id, text, is_done FROM notes WHERE user_id = %s ORDER BY note_id", (user_id,))
+    cursor.execute("SELECT note_id, text, is_done, da_te FROM notes WHERE user_id = %s ORDER BY note_id", (user_id,))
     notes = cursor.fetchall()
+    print (notes)
     cursor.close()
     conn.close()
     return notes
