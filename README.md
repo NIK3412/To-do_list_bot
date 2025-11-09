@@ -13,9 +13,13 @@ pip install -r requirements.txt
 В файле config.py указать токен бота:
 
 TOKEN = "ВАШ_ТОКЕН"
-dbname = имя БД postgreSQL
+
+dbname = имя БД postgreSQL 
+
 host = хост
+
 user = по умолчанию postgres
+
 password = пароль от БД
 
 ## Бот готов к запуску
