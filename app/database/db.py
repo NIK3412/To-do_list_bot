@@ -1,7 +1,7 @@
 import psycopg
 from psycopg.rows import dict_row
 from config import dbname, user, password, host
-
+import asyncio
 
 
 def connection():
